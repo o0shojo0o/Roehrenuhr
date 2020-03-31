@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html lang="de" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <title>Röhrenuhr - Konfiguration</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1><b>Röhrenuhr - Konfiguration</b></h1>
+        <form method="post" action="/saveoption" novalidate class="boxu">
+            <div>
+                <span class="pull-left">
+                    <b>Version:</b> <span id="version">@VERS</span>
+                </span>
+                <span class="pull-right">
+                    <b>SSID:</b> <span id="ssid">@SSID</span>
+                </span>
+            </div>
+            <br />
+            <div>
+                <span class="pull-right">
+                    <b>Quality:</b> <span id="signalstrength">@Qualiy % (@SIGNAL)</span>
+                </span>
+            </div>
+            <br />
+            <hr class="dashed">
+            <div>
+                <label for="timeZone">Zeitzone:</label><br />
+                <select name="timeZone" id="timeZone">
+                    <option value="1">+1 Central European</option>
+                    <option value="-5">-5 Eastern Standard</option>
+                    <option value="-4">-4 Eastern Daylight</option>
+                    <option value="-8">-8 Pacific Standard</option>
+                    <option value="-7">-7 Pacific Daylight</option>
+                </select>
+                <br />
+                <label for="displayMode">Anzahl der Segmente:</label><br />
+                <select name="displayMode" id="displayMode" onchange="twoSegSwitchIntervallActive()">
+                    <option value="2">2 Röhren</option>
+                    <option value="4">4 Röhren</option>
+                    <option value="6">6 Röhren</option>
+                </select>
+                <br />
+                <label for="twoSegSwitchIntervall">2 Seg Wechselinterv.:</label><br />
+                <select name="twoSegSwitchInterval" id="twoSegSwitchInterval">
+                    <option value="2000">2 Sekunden</option>
+                    <option value="4000">4 Sekunden</option>
+                    <option value="6000">6 Sekunden</option>
+                    <option value="8000">8 Sekunden</option>
+                    <option value="10000">10 Sekunden</option>
+                </select>
+                <br />
+                <label for="timeToDateSwitchInterval">Datum/Zeit Wechselinterv.:</label><br />
+                <select name="timeToDateSwitchInterval" id="timeToDateSwitchInterval" onchange="timeToDateSwitchFadeActive()">
+                    <option value="0">Aus</option>
+                    <option value="2000">2 Sekunden</option>
+                    <option value="4000">4 Sekunden</option>
+                    <option value="6000">6 Sekunden</option>
+                    <option value="8000">8 Sekunden</option>
+                    <option value="10000">10 Sekunden</option>
+                    <option value="20000">20 Sekunden</option>
+                    <option value="30000">30 Sekunden</option>
+                    <option value="40000">40 Sekunden</option>
+                    <option value="50000">50 Sekunden</option>
+                    <option value="60000">60 Sekunden</option>
+                </select>
+                <br />
+                <label for="timeToDateSwitchFade">Datum/Zeit Fadespeed:</label><br />
+                <select name="timeToDateSwitchFade" id="timeToDateSwitchFade">
+                    <option value="50">50 Millisek.</option>
+                    <option value="100">100 Millisek.</option>
+                    <option value="200">200 Millisek.</option>
+                    <option value="300">300 Millisek.</option>
+                    <option value="400">400 Millisek.</option>
+                    <option value="500">500 Millisek.</option>
+                    <option value="600">600 Millisek.</option>
+                    <option value="700">700 Millisek.</option>
+                </select>
+            </div>
+            <hr>
+            <button type="submit" class="btn">Speichern</button>
+            &emsp;
+            <button type="button" class="btn" onclick="location.href = '/factoryreset'">Zurücksetzten</button>
+            &emsp;
+            <button type="button" class="btn" onclick="location.href = '/wifisetup'">Wifi Setup</button>
+            &emsp;
+            <button type="button" class="btn" onclick="location.href = '/upload'">Firmware-Update</button>
+        </form>
+    </div>
+    <script>
+        function twoSegSwitchIntervallActive() {
+            document.getElementById('twoSegSwitchInterval').disabled = document.getElementById('displayMode').value != '2';
+        };
+
+        function timeToDateSwitchFadeActive() {
+            document.getElementById('timeToDateSwitchFade').disabled = !document.getElementById('timeToDateSwitchInterval').value != '0';
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('displayMode').value = '@DISPLAYMODE';
+            document.getElementById('twoSegSwitchInterval').value = '@TWOSEGSWITCHINTERVAL';
+            document.getElementById('timeZone').value = '@TIMEZONE';
+            document.getElementById('timeToDateSwitchInterval').value = '@TIMETODATEINTERVAL';
+            document.getElementById('timeToDateSwitchFade').value = '@TIMETODATEFADE';
+            twoSegSwitchIntervallActive();
+            timeToDateSwitchActive();
+            setInterval(function () { loadXMLDoc() }, 3000);
+            function loadXMLDoc() {
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+                        if (xmlhttp.status == 200) {
+                            var data = JSON.parse(xmlhttp.responseText);
+                            document.getElementById('signalstrength').innerText = data.WifiQuality + ' %' + ' (' + data.RSSI + ')';
+                        }
+                    }
+                };
+                xmlhttp.open("GET", "/api/jsonWifiInfo", true);
+                xmlhttp.send();
+            }
+        }, false);
+    </script>
+</body>
+</html>
